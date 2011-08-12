@@ -88,6 +88,7 @@ function Datepicker() {
 			// string value starting with '+' for current year + value
 		minDate: null, // The earliest selectable date, or null for no limit
 		maxDate: null, // The latest selectable date, or null for no limit
+		excludeDateRanges: null, // List of date ranges that should be unselectable.
 		duration: 'fast', // Duration of display/closure
 		beforeShowDay: null, // Function that takes a date and returns an array with
 			// [0] = true if selectable, false if not, [1] = custom CSS class name(s) or '',
@@ -465,6 +466,7 @@ $.extend(Datepicker.prototype, {
 			var date = this._getDateDatepicker(target, true);
 			var minDate = this._getMinMaxDate(inst, 'min');
 			var maxDate = this._getMinMaxDate(inst, 'max');
+			var excludeDateRanges = this._get(inst,'excludeDateRanges');
 			extendRemove(inst.settings, settings);
 			// reformat the old minDate/maxDate values if dateFormat changes and a new minDate/maxDate isn't provided
 			if (minDate !== null && settings['dateFormat'] !== undefined && settings['minDate'] === undefined)
@@ -1425,6 +1427,7 @@ $.extend(Datepicker.prototype, {
 			new Date(inst.currentYear, inst.currentMonth, inst.currentDay)));
 		var minDate = this._getMinMaxDate(inst, 'min');
 		var maxDate = this._getMinMaxDate(inst, 'max');
+		var excludeDateRanges = this._get(inst,'excludeDateRanges');
 		var drawMonth = inst.drawMonth - showCurrentAtPos;
 		var drawYear = inst.drawYear;
 		if (drawMonth < 0) {
@@ -1538,6 +1541,16 @@ $.extend(Datepicker.prototype, {
 						var otherMonth = (printDate.getMonth() != drawMonth);
 						var unselectable = (otherMonth && !selectOtherMonths) || !daySettings[0] ||
 							(minDate && printDate < minDate) || (maxDate && printDate > maxDate);
+						if (excludeDateRanges) {
+						    var range=23;
+                                                    for (var range=0;range<excludeDateRanges.length;++range) {
+							unselectable = (unselectable || 
+									(printDate >= excludeDateRanges[range][0] &&
+									 printDate <= excludeDateRanges[range][1]));
+                                                    }
+
+						}
+
 						tbody += '<td class="' +
 							((dow + firstDay + 6) % 7 >= 5 ? ' ui-datepicker-week-end' : '') + // highlight weekends
 							(otherMonth ? ' ui-datepicker-other-month' : '') + // highlight days from other months
